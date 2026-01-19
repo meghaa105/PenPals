@@ -67,7 +67,7 @@ const Dashboard: React.FC<DashboardProps> = ({ loops, onSelect, onEdit, onCreate
                 <div className="flex items-center justify-between mb-8">
                   <div className="flex items-center -space-x-4">
                     {loop.members.slice(0, 4).map(member => (
-                      <MemberAvatar key={member.id} member={member} className="group-hover:grayscale-0 grayscale" />
+                      <MemberAvatar key={member.id} member={member} />
                     ))}
                     {loop.members.length > 4 && (
                       <div className="w-12 h-12 rounded-full bg-white border-2 border-black flex items-center justify-center text-[10px] font-black shadow-[2px_2px_0px_0px_#000] z-10">

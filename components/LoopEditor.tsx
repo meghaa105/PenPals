@@ -283,7 +283,7 @@ const LoopEditor: React.FC<LoopEditorProps> = ({ loop, onSave, onCancel, onDelet
                       key={member.id} 
                       className="flex items-center gap-4 p-4 neo-brutal bg-violet-50 group hover:bg-white transition-all animate-in zoom-in-95 duration-200"
                     >
-                      <MemberAvatar member={member} size="sm" className="grayscale group-hover:grayscale-0" />
+                      <MemberAvatar member={member} size="sm" />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-black text-black uppercase tracking-tighter truncate">{member.name}</p>
                         <p className="text-[9px] text-stone-400 font-bold lowercase truncate">{member.email}</p>

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Member } from '../types.ts';
 
 interface MemberAvatarProps {
@@ -31,8 +31,6 @@ const getColorClass = (name: string) => {
 };
 
 export const MemberAvatar: React.FC<MemberAvatarProps> = ({ member, size = 'md', className = '' }) => {
-  const [imgError, setImgError] = useState(false);
-
   const sizeClasses = {
     xs: 'w-8 h-8 text-[8px]',
     sm: 'w-10 h-10 text-[10px]',
@@ -40,26 +38,14 @@ export const MemberAvatar: React.FC<MemberAvatarProps> = ({ member, size = 'md',
     lg: 'w-16 h-16 text-sm',
   };
 
-  const commonClasses = `rounded-full border-2 border-black flex-shrink-0 flex items-center justify-center font-black transition-all shadow-[2px_2px_0px_0px_#000] object-cover bg-white ${sizeClasses[size]} ${className}`;
-
-  if (!member.avatar || imgError) {
-    return (
-      <div 
-        className={`${commonClasses} ${getColorClass(member.name)}`}
-        title={member.name}
-      >
-        {getInitials(member.name)}
-      </div>
-    );
-  }
+  const commonClasses = `rounded-full border-2 border-black flex-shrink-0 flex items-center justify-center font-black transition-all shadow-[2px_2px_0px_0px_#000] ${sizeClasses[size]} ${getColorClass(member.name)} ${className}`;
 
   return (
-    <img 
-      src={member.avatar} 
-      onError={() => setImgError(true)}
+    <div 
       className={commonClasses}
       title={member.name}
-      alt={member.name}
-    />
+    >
+      {getInitials(member.name)}
+    </div>
   );
 };
