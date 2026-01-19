@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { Loop, Member } from '../types.ts';
-import { MemberAvatar } from './MemberAvatar.tsx';
+import { Loop, Member } from '../types';
+import { MemberAvatar } from './MemberAvatar';
 
 interface PublicReaderViewProps {
   loop: Loop;

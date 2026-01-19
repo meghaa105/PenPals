@@ -2,7 +2,7 @@
 import React, { useState, useRef } from 'react';
 import { Loop, Question, Member, Frequency, CollationMode } from '../types';
 import { suggestQuestions } from '../services/geminiService';
-import { MemberAvatar } from './MemberAvatar.tsx';
+import { MemberAvatar } from './MemberAvatar';
 
 interface LoopEditorProps {
   loop?: Loop;

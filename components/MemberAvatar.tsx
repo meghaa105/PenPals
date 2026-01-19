@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Member } from '../types.ts';
+import { Member } from '../types';
 
 interface MemberAvatarProps {
   member: Member;

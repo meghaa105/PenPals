@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { Loop } from '../types.ts';
-import { MemberAvatar } from './MemberAvatar.tsx';
+import { Loop } from '../types';
+import { MemberAvatar } from './MemberAvatar';
 
 interface DashboardProps {
   loops: Loop[];
