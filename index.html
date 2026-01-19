@@ -47,20 +47,33 @@
             filter: drop-shadow(0 0 1px #fff) drop-shadow(0 0 1px #fff) drop-shadow(0 0 1px #fff);
         }
     </style>
+    <!-- Essential Shim for Gemini SDK in Browser -->
+    <script>
+        window.process = { 
+            env: { 
+                NODE_ENV: 'production',
+                API_KEY: '' // Will be injected by the environment or replaced manually
+            } 
+        };
+    </script>
 <script type="importmap">
 {
   "imports": {
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "react": "https://esm.sh/react@^19.2.3",
-    "@google/genai": "https://esm.sh/@google/genai@^1.37.0",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/"
+    "react": "https://esm.sh/react@^19.0.0",
+    "react/": "https://esm.sh/react@^19.0.0/",
+    "react-dom": "https://esm.sh/react-dom@^19.0.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.0.0/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.37.0"
   }
 }
 </script>
 </head>
 <body>
     <div id="root"></div>
-    <!-- Entry point for the application -->
+    <!-- 
+      The application entry point. 
+      In this environment, this script tag is handled by a runtime transpiler.
+    -->
     <script type="module" src="./index.tsx"></script>
 </body>
 </html>
