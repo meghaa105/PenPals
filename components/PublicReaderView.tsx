@@ -82,36 +82,47 @@ const PublicReaderView: React.FC<PublicReaderViewProps> = ({ loop, onBackToApp }
               <div className="mt-12 w-24 h-1 bg-violet-600" />
             </div>
 
-            {/* Questions/Responses Grid */}
-            <div className="space-y-48">
-              {groupedResponses.map((item, idx) => (
-                <div key={idx} className="relative">
-                  <div className="flex items-start gap-8 mb-20 border-b-2 border-black pb-8">
-                    <span className="text-[10px] font-black text-stone-300 pt-4 tracking-[0.5em] uppercase">Q_{String(idx+1).padStart(2, '0')}</span>
-                    <h3 className="text-4xl md:text-6xl serif font-black text-black leading-tight max-w-3xl">
-                      {item.q}
-                    </h3>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-20 gap-y-32">
-                    {item.r.map((resp, ridx) => (
-                      <div key={ridx} className={`space-y-8 relative ${ridx % 2 === 0 ? 'md:translate-y-12' : ''}`}>
-                        <div className="flex items-center gap-5">
-                          <img src={resp.avatar} className="w-16 h-16 rounded-full border-2 border-black neo-brutal-static" />
-                          <div>
-                            <span className="text-[10px] font-black text-black uppercase tracking-[0.2em]">{resp.name}</span>
-                            <div className="h-0.5 w-12 bg-black/20" />
+            {loop.collationMode === 'ai' && loop.narrativeText ? (
+              <div className="max-w-4xl mx-auto">
+                 <div className="px-4 py-1 bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase tracking-[0.4em] mb-12 inline-block">
+                    The Week in Review
+                 </div>
+                 <div className="text-3xl md:text-4xl text-stone-800 leading-relaxed font-serif whitespace-pre-wrap">
+                   {loop.narrativeText}
+                 </div>
+              </div>
+            ) : (
+              /* Questions/Responses Grid (Verbatim) */
+              <div className="space-y-48">
+                {groupedResponses.map((item, idx) => (
+                  <div key={idx} className="relative">
+                    <div className="flex items-start gap-8 mb-20 border-b-2 border-black pb-8">
+                      <span className="text-[10px] font-black text-stone-300 pt-4 tracking-[0.5em] uppercase">Q_{String(idx+1).padStart(2, '0')}</span>
+                      <h3 className="text-4xl md:text-6xl serif font-black text-black leading-tight max-w-3xl">
+                        {item.q}
+                      </h3>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-20 gap-y-32">
+                      {item.r.map((resp, ridx) => (
+                        <div key={ridx} className={`space-y-8 relative ${ridx % 2 === 0 ? 'md:translate-y-12' : ''}`}>
+                          <div className="flex items-center gap-5">
+                            <img src={resp.avatar} className="w-16 h-16 rounded-full border-2 border-black neo-brutal-static" />
+                            <div>
+                              <span className="text-[10px] font-black text-black uppercase tracking-[0.2em]">{resp.name}</span>
+                              <div className="h-0.5 w-12 bg-black/20" />
+                            </div>
                           </div>
+                          <p className="text-2xl md:text-3xl text-stone-800 leading-[1.4] font-medium italic serif tracking-tight">
+                            "{resp.text}"
+                          </p>
                         </div>
-                        <p className="text-2xl md:text-3xl text-stone-800 leading-[1.4] font-medium italic serif tracking-tight">
-                          "{resp.text}"
-                        </p>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
             
             <div className="text-center pt-24 border-t-2 border-black">
                <p className="text-black font-black uppercase tracking-[0.5em] text-xs">Stay Curious. End of Issue.</p>

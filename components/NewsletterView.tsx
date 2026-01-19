@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
-import { Loop, Member } from '../types.ts';
-import { generateNewsletterIntro, generateHeaderImage } from '../services/geminiService.ts';
+import { Loop, Member, CollationMode } from '../types.ts';
+import { generateNewsletterIntro, generateHeaderImage, generateNarrativeCollation } from '../services/geminiService.ts';
 
 interface NewsletterViewProps {
   loop: Loop;
@@ -20,15 +20,17 @@ const NewsletterView: React.FC<NewsletterViewProps> = ({ loop, onUpdate, onBack 
   const handleGenerate = async () => {
     setIsGenerating(true);
     try {
-      const [intro, header] = await Promise.all([
+      const [intro, header, narrative] = await Promise.all([
         generateNewsletterIntro(loop.name, loop.responses, loop.members),
-        generateHeaderImage(`Newsletter about ${loop.name} ${loop.description}`)
+        generateHeaderImage(`Newsletter about ${loop.name} ${loop.description}`),
+        generateNarrativeCollation(loop.name, loop.questions, loop.responses, loop.members)
       ]);
       
       onUpdate({
         ...loop,
         introText: intro,
         headerImage: header,
+        narrativeText: narrative,
         lastGeneratedAt: new Date().toISOString()
       });
     } catch (e) {
@@ -36,6 +38,10 @@ const NewsletterView: React.FC<NewsletterViewProps> = ({ loop, onUpdate, onBack 
     } finally {
       setIsGenerating(false);
     }
+  };
+
+  const handleModeToggle = (mode: CollationMode) => {
+    onUpdate({ ...loop, collationMode: mode });
   };
 
   const handlePublish = async () => {
@@ -79,7 +85,11 @@ const NewsletterView: React.FC<NewsletterViewProps> = ({ loop, onUpdate, onBack 
       if (map[r.questionId]) {
         const member = loop.members.find(m => m.id === r.memberId);
         if (member) {
-          map[r.questionId].r.push({ name: member.name, avatar: member.avatar, text: r.answer });
+          map[r.questionId].r.push({ 
+            name: member.name, 
+            avatar: member.avatar, 
+            text: r.answer 
+          });
         }
       }
     });
@@ -160,6 +170,24 @@ const NewsletterView: React.FC<NewsletterViewProps> = ({ loop, onUpdate, onBack 
 
       {viewMode === 'preview' ? (
         <div className="space-y-8">
+          {/* Collation Options Switcher */}
+          <div className="flex justify-center mb-8">
+            <div className="bg-white p-2 neo-brutal-static flex gap-2">
+              <button 
+                onClick={() => handleModeToggle('ai')}
+                className={`px-8 py-3 text-xs font-black uppercase tracking-widest transition-all ${loop.collationMode === 'ai' ? 'bg-black text-white' : 'text-stone-400 hover:bg-stone-50'}`}
+              >
+                ✨ AI Story
+              </button>
+              <button 
+                onClick={() => handleModeToggle('verbatim')}
+                className={`px-8 py-3 text-xs font-black uppercase tracking-widest transition-all ${loop.collationMode === 'verbatim' ? 'bg-black text-white' : 'text-stone-400 hover:bg-stone-50'}`}
+              >
+                📝 Verbatim
+              </button>
+            </div>
+          </div>
+
           <div className="bg-white shadow-2xl rounded-[4rem] overflow-hidden border border-stone-100">
             <div className="relative h-[550px]">
               {loop.headerImage ? (
@@ -197,50 +225,66 @@ const NewsletterView: React.FC<NewsletterViewProps> = ({ loop, onUpdate, onBack 
             </div>
 
             <div className="p-16 md:p-32">
-              <div className="max-w-3xl mb-48 relative">
+              <div className="max-w-3xl mb-24 relative">
                 <span className="text-amber-500/10 font-serif text-[20rem] absolute -top-40 -left-20 select-none">“</span>
                 <p className="text-3xl text-stone-800 leading-[1.6] italic serif relative z-10 first-letter:text-7xl first-letter:font-bold first-letter:mr-2 first-letter:float-left first-letter:text-amber-600">
                   {loop.introText || "Once you curate the edition, Gemini will weave everyone's replies into a cohesive introduction."}
                 </p>
               </div>
 
-              <div className="space-y-48">
-                {groupedResponses.length === 0 ? (
-                  <div className="text-center py-32 bg-stone-50/50 rounded-[3rem] border-2 border-dashed border-stone-100 flex flex-col items-center">
-                    <p className="text-stone-400 italic text-xl max-w-sm font-serif">No responses collected yet.</p>
-                    <button 
-                      onClick={() => copyLink('respond')}
-                      className="mt-8 text-amber-600 font-bold flex items-center gap-2"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1" />
-                      </svg>
-                      Copy Response Link
-                    </button>
-                  </div>
-                ) : (
-                  groupedResponses.map((item, idx) => (
-                    <div key={idx}>
-                      <h3 className="text-5xl serif font-bold text-stone-900 mb-20 leading-[1.2] max-w-3xl">
-                        {item.q}
-                      </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-24 gap-y-24">
-                        {item.r.map((resp, ridx) => (
-                          <div key={ridx} className="space-y-8">
-                            <div className="flex items-center gap-5">
-                              <img src={resp.avatar} className="w-14 h-14 rounded-full ring-8 ring-stone-50" />
-                              <span className="text-sm font-black text-stone-900 uppercase tracking-widest">{resp.name}</span>
-                            </div>
-                            <p className="text-2xl text-stone-600 leading-relaxed font-light serif">
-                              {resp.text}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
+              {loop.collationMode === 'ai' ? (
+                <div className="max-w-4xl mx-auto py-12">
+                   <div className="prose prose-stone lg:prose-2xl">
+                     {loop.narrativeText ? (
+                       <div className="text-stone-700 leading-relaxed font-serif space-y-6 text-2xl whitespace-pre-wrap">
+                         {loop.narrativeText}
+                       </div>
+                     ) : (
+                       <div className="text-center py-20 border-2 border-dashed border-stone-200 rounded-3xl">
+                         <p className="text-stone-400 italic">Curate the collation to see the story.</p>
+                       </div>
+                     )}
+                   </div>
+                </div>
+              ) : (
+                <div className="space-y-48">
+                  {groupedResponses.length === 0 ? (
+                    <div className="text-center py-32 bg-stone-50/50 rounded-[3rem] border-2 border-dashed border-stone-100 flex flex-col items-center">
+                      <p className="text-stone-400 italic text-xl max-w-sm font-serif">No responses collected yet.</p>
+                      <button 
+                        onClick={() => copyLink('respond')}
+                        className="mt-8 text-amber-600 font-bold flex items-center gap-2"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1" />
+                        </svg>
+                        Copy Response Link
+                      </button>
                     </div>
-                  ))
-                )}
-              </div>
+                  ) : (
+                    groupedResponses.map((item, idx) => (
+                      <div key={idx}>
+                        <h3 className="text-5xl serif font-bold text-stone-900 mb-20 leading-[1.2] max-w-3xl">
+                          {item.q}
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-24 gap-y-24">
+                          {item.r.map((resp, ridx) => (
+                            <div key={ridx} className="space-y-8">
+                              <div className="flex items-center gap-5">
+                                <img src={resp.avatar} className="w-14 h-14 rounded-full ring-8 ring-stone-50" />
+                                <span className="text-sm font-black text-stone-900 uppercase tracking-widest">{resp.name}</span>
+                              </div>
+                              <p className="text-2xl text-stone-600 leading-relaxed font-light serif">
+                                {resp.text}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
 
               <div className="mt-60 pt-24 border-t border-stone-100 text-center">
                 <div className="flex flex-col items-center gap-10">
@@ -255,6 +299,13 @@ const NewsletterView: React.FC<NewsletterViewProps> = ({ loop, onUpdate, onBack 
                    ) : (
                       <div className="flex flex-col items-center gap-6">
                         <div className="flex gap-4">
+                          <button 
+                            onClick={handleGenerate}
+                            disabled={isGenerating}
+                            className="bg-white border-2 border-black text-black px-12 py-5 rounded-full font-black text-xl hover:bg-stone-50 transition-all"
+                          >
+                             {isGenerating ? 'Refreshing...' : 'Refresh AI Collation'}
+                          </button>
                           <button 
                             onClick={handlePublish}
                             disabled={isPublishing}

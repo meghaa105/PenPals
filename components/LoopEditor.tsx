@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Loop, Question, Member, Frequency } from '../types';
+import { Loop, Question, Member, Frequency, CollationMode } from '../types';
 import { suggestQuestions } from '../services/geminiService';
 
 interface LoopEditorProps {
@@ -24,6 +24,8 @@ const LoopEditor: React.FC<LoopEditorProps> = ({ loop, onSave, onCancel, onDelet
   const [frequency, setFrequency] = useState<Frequency>(loop?.frequency || 'monthly');
   const [questions, setQuestions] = useState<Question[]>(loop?.questions || []);
   const [members, setMembers] = useState<Member[]>(loop?.members || []);
+  // Fix: Track collationMode to satisfy required Loop property and preserve existing state
+  const [collationMode] = useState<CollationMode>(loop?.collationMode || 'verbatim');
   
   const [newQuestionText, setNewQuestionText] = useState('');
   const [newMemberName, setNewMemberName] = useState('');
@@ -84,6 +86,7 @@ const LoopEditor: React.FC<LoopEditorProps> = ({ loop, onSave, onCancel, onDelet
         alert("You need at least one person in your circle!");
         return;
     }
+    // Fix: Added collationMode and narrativeText to the result object
     const result: Loop = {
       id: loop?.id || Date.now().toString(),
       name,
@@ -93,9 +96,11 @@ const LoopEditor: React.FC<LoopEditorProps> = ({ loop, onSave, onCancel, onDelet
       questions,
       members,
       responses: loop?.responses || [],
+      collationMode,
       lastGeneratedAt: loop?.lastGeneratedAt,
       headerImage: loop?.headerImage,
       introText: loop?.introText,
+      narrativeText: loop?.narrativeText,
       nextSendDate: loop?.nextSendDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
     };
     onSave(result);

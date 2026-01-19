@@ -58,6 +58,37 @@ export const generateNewsletterIntro = async (loopName: string, responses: Respo
   return response.text || "Welcome to another edition of our collective journey. It's time to pause and catch up with the beautiful souls in this loop.";
 };
 
+export const generateNarrativeCollation = async (loopName: string, questions: Question[], responses: Response[], members: Member[]): Promise<string> => {
+  const ai = getAI();
+  const memberMap = new Map(members.map(m => [m.id, m.name]));
+  const questionMap = new Map(questions.map(q => [q.id, q.text]));
+  
+  const dataString = responses.map(r => {
+    const qText = questionMap.get(r.questionId);
+    const mName = memberMap.get(r.memberId);
+    return `[Question: ${qText}] [Member: ${mName}] [Answer: ${r.answer}]`;
+  }).join('\n');
+
+  const response = await ai.models.generateContent({
+    model: 'gemini-3-pro-preview',
+    contents: `You are a world-class magazine editor for a private group called "${loopName}". 
+    Below are the responses members shared this week. 
+    Transform these raw answers into a beautiful, cohesive narrative story. 
+    
+    RULES:
+    1. Do NOT just list them. Weave them together into a flowing "Week in Review" article.
+    2. Mention members by name naturally (e.g., "While Alex was conquering a 10k run, Jordan was discovering the city's best espresso...").
+    3. Keep the tone warm, witty, and celebratory.
+    4. Group similar vibes or themes together.
+    5. Length: 300-500 words.
+    
+    RESPONSES:
+    ${dataString}`,
+  });
+
+  return response.text || "The week unfolded in a tapestry of small moments and big wins...";
+};
+
 export const generateHeaderImage = async (prompt: string): Promise<string> => {
   const ai = getAI();
   const response = await ai.models.generateContent({

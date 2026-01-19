@@ -31,6 +31,7 @@ const INITIAL_LOOPS: Loop[] = [
       { id: 'r2', memberId: '2', questionId: 'q1', answer: 'Found a hidden gem of a coffee shop in downtown.' },
       { id: 'r3', memberId: '3', questionId: 'q2', answer: 'Started watching "The Bear". It is intense but great.' }
     ],
+    collationMode: 'verbatim',
     lastGeneratedAt: new Date().toISOString(),
     headerImage: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&q=80&w=1200',
     introText: "Welcome to our very first edition of The Sunday Social. It's been a week of small victories and new discoveries. From finishing long-distance runs to finding the perfect shot of espresso, we're celebrating the little things that make life grand. Grab a coffee and settle in—here is what our circle has been up to.",
@@ -44,7 +45,9 @@ const App: React.FC = () => {
     const saved = localStorage.getItem('loopy_loops');
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        // Ensure collationMode exists for migration
+        return parsed.map((l: Loop) => ({ ...l, collationMode: l.collationMode || 'verbatim' }));
       } catch (e) {
         return INITIAL_LOOPS;
       }
@@ -58,14 +61,10 @@ const App: React.FC = () => {
     const handleRoute = () => {
       const hash = window.location.hash;
       if (!hash) {
-        if (view !== 'landing' && view !== 'dashboard' && view !== 'editor' && view !== 'newsletter') {
-           // Do nothing, handleRoute only cares about public links
-        }
         return;
       }
 
       const parts = hash.split('/');
-      // Pattern: #/loop/:id/read or #/loop/:id/respond
       if (parts[1] === 'loop' && parts[2]) {
         const loopId = parts[2];
         const mode = parts[3];
@@ -76,7 +75,7 @@ const App: React.FC = () => {
     };
 
     window.addEventListener('hashchange', handleRoute);
-    handleRoute(); // Run on mount
+    handleRoute(); 
     return () => window.removeEventListener('hashchange', handleRoute);
   }, []);
 
@@ -92,7 +91,7 @@ const App: React.FC = () => {
       if (exists) {
         return prev.map(l => l.id === loop.id ? loop : l);
       }
-      return [...prev, loop];
+      return [...prev, { ...loop, collationMode: loop.collationMode || 'verbatim' }];
     });
     setActiveLoopId(loop.id);
   };
